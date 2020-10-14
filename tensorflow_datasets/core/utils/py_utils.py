@@ -53,6 +53,7 @@ else:
 
 ReadOnlyPath = type_utils.ReadOnlyPath
 ReadWritePath = type_utils.ReadWritePath
+PathLike = type_utils.PathLike
 Tree = type_utils.Tree
 
 # NOTE: When used on an instance method, the cache is shared across all
@@ -384,8 +385,8 @@ def incomplete_dir(dirname):
 def tfds_dir() -> str:
   """Path to tensorflow_datasets directory.
 
-  The difference with `tfds.core.get_tfds_path` is that this function can be
-  used for write access while `tfds.core.get_tfds_path` should be used for
+  The difference with `tfds.core.tfds_path` is that this function can be
+  used for write access while `tfds.core.tfds_path` should be used for
   read-only.
 
   Returns:
@@ -403,10 +404,27 @@ def atomic_write(path, mode):
   tf.io.gfile.rename(tmp_path, path, overwrite=True)
 
 
-def get_tfds_path(relative_path):
-  """Returns absolute path to file given path relative to tfds root."""
-  path = os.path.join(tfds_dir(), relative_path)
-  return path
+def tfds_path(*relative_path: PathLike) -> ReadOnlyPath:
+  """Returns path to file given path relative to tfds root.
+
+  The following examples are equivalent:
+
+  ```
+  path = tfds.core.tfds_path() / 'path/to/data.txt'
+  path = tfds.core.tfds_path('path/to/data.txt')
+  path = tfds.core.tfds_path('path', 'to', 'data.txt')
+  ```
+
+  Note: Even if `/` is used, those examples are compatible with Windows, as
+  pathlib will automatically normalize the paths.
+
+  Args:
+    *relative_path: Relative path, eventually to concatenate.
+
+  Returns:
+    path: The absolute TFDS path.
+  """
+  return resource_path('tensorflow_datasets').joinpath(*relative_path)
 
 
 def resource_path(

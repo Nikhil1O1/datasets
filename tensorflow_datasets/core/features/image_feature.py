@@ -16,7 +16,6 @@
 """Image feature."""
 
 import numpy as np
-import six
 import tensorflow.compat.v2 as tf
 
 from tensorflow_datasets.core import lazy_imports_lib
@@ -142,7 +141,7 @@ class Image(feature.FeatureConnector):
     """Convert the given image into a dict convertible to tf example."""
     if isinstance(image_or_path_or_fobj, np.ndarray):
       encoded_image = self._encode_image(image_or_path_or_fobj)
-    elif isinstance(image_or_path_or_fobj, six.string_types):
+    elif isinstance(image_or_path_or_fobj, type_utils.PathLikeCls):
       with tf.io.gfile.GFile(image_or_path_or_fobj, 'rb') as image_f:
         encoded_image = image_f.read()
     else:
